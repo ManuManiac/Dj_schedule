@@ -94,14 +94,24 @@
   import { getFirestore, collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
   // PASTE YOUR FIREBASE CONFIG HERE
-  const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT.firebaseapp.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT.appspot.com",
-    messagingSenderId: "YOUR_SENDER_ID",
-    appId: "YOUR_APP_ID"
-  };
+  // Your web app's Firebase configuration
+
+const firebaseConfig = {
+
+  apiKey: "AIzaSyDiDb1kbE-HCUqtRxoFynhX6t7X0D3icXY",
+
+  authDomain: "dj-schedule-board.firebaseapp.com",
+
+  projectId: "dj-schedule-board",
+
+  storageBucket: "dj-schedule-board.firebasestorage.app",
+
+  messagingSenderId: "324584717998",
+
+  appId: "1:324584717998:web:d8dce2afb63cac617df73f"
+
+};
+
 
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
