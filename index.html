@@ -2,262 +2,248 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Club Pulse — DJ Schedule Board</title>
+<title>Club Pulse - DJ Schedule Board</title>
 <style>
-  :root{
-    --bg:#0b0b14; --panel:#14142a; --panel2:#1c1c38; --accent:#b026ff;
-    --accent2:#00e5ff; --text:#e8e8ff; --dim:#8a8ab0; --good:#3dff9c; --bad:#ff5c7a;
-  }
-  *{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',Arial,sans-serif}
-  body{background:radial-gradient(ellipse at top,#1a1a35 0%,var(--bg) 60%);color:var(--text);min-height:100vh;padding:20px}
-  header{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:20px}
-  h1{font-size:1.6rem;letter-spacing:3px;text-transform:uppercase;
-     background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent}
-  .sub{color:var(--dim);font-size:.8rem}
-  .btn{background:linear-gradient(135deg,var(--accent),#7a1fd0);border:none;color:#fff;padding:9px 18px;border-radius:8px;
-       cursor:pointer;font-weight:600;font-size:.85rem;transition:.2s}
-  .btn:hover{filter:brightness(1.2)}
-  .btn.ghost{background:transparent;border:1px solid var(--accent);color:var(--accent)}
-  .btn.small{padding:5px 12px;font-size:.75rem}
-  .btn.danger{background:transparent;border:1px solid var(--bad);color:var(--bad)}
-  .btn.good{border-color:var(--good);color:var(--good);background:transparent;border:1px solid var(--good)}
-  .toolbar{display:flex;gap:8px;flex-wrap:wrap}
-  #loginBox{display:none;gap:8px;align-items:center;background:var(--panel);padding:10px;border-radius:10px;margin-bottom:16px;flex-wrap:wrap}
-  input,select{background:var(--panel2);border:1px solid #33335c;color:var(--text);padding:8px 10px;border-radius:6px;font-size:.85rem}
-  input:focus,select:focus{outline:none;border-color:var(--accent)}
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:16px}
-  .card{background:linear-gradient(160deg,var(--panel),var(--panel2));border:1px solid #2a2a55;border-radius:14px;
-        padding:16px;position:relative;overflow:hidden;transition:.25s}
-  .card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
-        background:linear-gradient(90deg,var(--accent),var(--accent2))}
-  .card:hover{transform:translateY(-3px);box-shadow:0 8px 25px rgba(176,38,255,.25)}
-  .card h2{font-size:1.05rem;margin-bottom:6px;color:var(--accent2)}
-  .row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px dashed #2a2a55;font-size:.85rem}
-  .row:last-child{border-bottom:none}
-  .row b{color:var(--dim);font-weight:600;font-size:.75rem;text-transform:uppercase;letter-spacing:1px}
-  .genre{display:inline-block;background:rgba(0,229,255,.12);color:var(--accent2);padding:2px 10px;border-radius:20px;font-size:.75rem;margin-top:8px}
-  .card-actions{display:flex;gap:6px;margin-top:10px}
-  .card-actions .btn{flex:1}
-  #editor{display:none;background:var(--panel);border:1px solid #33335c;border-radius:14px;padding:20px;margin-bottom:20px}
-  #editor h3{margin-bottom:14px;color:var(--accent2)}
-  .form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
-  .field label{display:block;font-size:.72rem;color:var(--dim);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
-  .field input,.field select{width:100%}
-  .empty{grid-column:1/-1;text-align:center;color:var(--dim);padding:60px 0}
-  #statusMsg{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--good);color:#000;
-             padding:10px 22px;border-radius:8px;font-weight:600;display:none;z-index:99}
-  .mode-badge{background:var(--good);color:#000;font-size:.7rem;font-weight:700;padding:3px 10px;border-radius:12px;display:none}
-  .mode-badge.view{display:inline-block;background:#33335c;color:var(--dim)}
-  a.sllink{color:var(--accent2);text-decoration:none}
-  a.sllink:hover{text-decoration:underline}
+  body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0a0a1a; color: #eee; margin: 0; padding: 20px; }
+  .container { max-width: 900px; margin: auto; }
+  h1 { text-align: center; color: #0ff; text-shadow: 0 0 10px #0ff; }
+  .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+  .btn { background: #0ff; color: #000; border: none; padding: 10px 20px; cursor: pointer; border-radius: 4px; font-weight: bold; text-transform: uppercase; box-shadow: 0 0 10px #0ff; }
+  .btn:hover { background: #fff; }
+  .btn-danger { background: #f0f; color: #fff; box-shadow: 0 0 10px #f0f; }
+  .btn-secondary { background: #333; color: #0ff; border: 1px solid #0ff; box-shadow: none; }
+  .slot { background: rgba(20, 20, 40, 0.8); border: 1px solid #0ff; padding: 20px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 0 15px rgba(0, 255, 255, 0.2); }
+  .slot h3 { margin: 0 0 10px 0; color: #f0f; text-shadow: 0 0 5px #f0f; }
+  .slot p { margin: 5px 0; color: #ccc; }
+  .slot .label { color: #0ff; font-weight: bold; }
+  .teleport-link { color: #0f0; text-decoration: none; font-weight: bold; text-shadow: 0 0 5px #0f0; }
+  #loginArea, #editArea { background: rgba(20, 20, 40, 0.9); border: 1px solid #f0f; padding: 25px; border-radius: 8px; margin-bottom: 25px; display: none; box-shadow: 0 0 20px rgba(255, 0, 255, 0.3); }
+  .form-group { margin-bottom: 15px; }
+  .form-group label { display: block; margin-bottom: 5px; color: #0ff; font-weight: bold; }
+  .form-group input, .form-group select { width: 100%; padding: 10px; background: #111; border: 1px solid #0ff; color: #fff; border-radius: 4px; box-sizing: border-box; font-size: 14px; }
+  .form-group input:focus, .form-group select:focus { outline: none; border-color: #f0f; box-shadow: 0 0 5px #f0f; }
+  .hidden { display: none !important; }
 </style>
 </head>
 <body>
-<header>
-  <div>
-    <h1>🎧 Club Pulse — DJ Schedule</h1>
-    <div class="sub">Live schedule board &nbsp;•&nbsp; <span class="mode-badge view" id="modeBadge">VIEW ONLY</span></div>
+<div class="container">
+  <div class="top-bar">
+    <h1>Club Pulse - DJ Schedule</h1>
+    <div id="authControls">
+      <button class="btn" id="loginBtn">DJ Login</button>
+      <button class="btn btn-secondary hidden" id="logoutBtn">Logout</button>
+    </div>
   </div>
-  <div class="toolbar">
-    <button class="btn" id="addBtn" style="display:none">＋ Add Slot</button>
-    <button class="btn ghost small" id="importBtn" style="display:none">Import</button>
-    <button class="btn ghost small" id="exportBtn">Export</button>
-    <button class="btn ghost small" id="loginBtn">🔒 DJ Login</button>
+
+  <div id="loginArea">
+    <h2 style="color:#f0f; text-align:center;">DJ Login</h2>
+    <div class="form-group">
+      <label>Email</label>
+      <input type="email" id="loginEmail" placeholder="dj@clubpulse.com">
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="loginPassword">
+    </div>
+    <button class="btn" id="submitLogin" style="width:100%;">Login</button>
+    <p id="loginError" style="color:#f33; text-align:center; display:none; margin-top:10px;"></p>
   </div>
-</header>
 
-<div id="loginBox">
-  <span style="font-size:.85rem;color:var(--dim)">DJ password:</span>
-  <input type="password" id="pwInput" placeholder="Enter password">
-  <button class="btn small" id="doLogin">Login</button>
-  <span id="loginErr" style="color:var(--bad);font-size:.8rem"></span>
-</div>
-
-<div id="editor">
-  <h3 id="editorTitle">Add Schedule Slot</h3>
-  <input type="hidden" id="f_id">
-  <div class="form-grid">
-    <div class="field"><label>DJ Name *</label><input id="f_dj" placeholder="DJ Nova"></div>
-    <div class="field"><label>Location / Venue *</label><input id="f_loc" placeholder="Club Pulse Main Stage"></div>
-    <div class="field"><label>Host *</label><input id="f_host" placeholder="Host name"></div>
-    <div class="field"><label>Date *</label><input id="f_date" type="date"></div>
-    <div class="field"><label>Start Time *</label><input id="f_time" type="time"></div>
-    <div class="field"><label>End Time</label><input id="f_timeEnd" type="time"></div>
-    <div class="field"><label>Music Genre *</label>
-      <select id="f_genre">
-        <option value="">— choose —</option>
-        <option>House</option><option>Techno</option><option>Trance</option>
-        <option>EDM</option><option>Hip-Hop / R&B</option><option>Rock</option>
-        <option>Country</option><option>Pop / Top 40</option><option>80s / Retro</option>
-        <option>Dubstep / Bass</option><option>Drum & Bass</option><option>Open Format</option>
-        <option>Other</option>
+  <div id="editArea">
+    <h2 id="editTitle" style="color:#0ff; text-align:center;">Add Schedule Slot</h2>
+    <input type="hidden" id="editId">
+    <div class="form-group"><label>DJ Name *</label><input type="text" id="fDj" required></div>
+    <div class="form-group"><label>Location / Venue *</label><input type="text" id="fLocation" required></div>
+    <div class="form-group"><label>Host *</label><input type="text" id="fHost" required></div>
+    <div class="form-group"><label>Date *</label><input type="date" id="fDate" required></div>
+    <div class="form-group"><label>Start Time *</label><input type="time" id="fStart" required></div>
+    <div class="form-group"><label>End Time</label><input type="time" id="fEnd"></div>
+    <div class="form-group">
+      <label>Music Genre *</label>
+      <select id="fGenre" required>
+        <option value="">choose</option>
+        <option value="House">House</option>
+        <option value="Techno">Techno</option>
+        <option value="Trance">Trance</option>
+        <option value="EDM">EDM</option>
+        <option value="Hip-Hop / R&B">Hip-Hop / R&B</option>
+        <option value="Rock">Rock</option>
+        <option value="Country">Country</option>
+        <option value="Pop / Top 40">Pop / Top 40</option>
+        <option value="80s / Retro">80s / Retro</option>
+        <option value="Dubstep / Bass">Dubstep / Bass</option>
+        <option value="Drum & Bass">Drum & Bass</option>
+        <option value="Open Format">Open Format</option>
+        <option value="Other">Other</option>
       </select>
     </div>
-    <div class="field"><label>SLurl (web: teleport link)</label><input id="f_slurl" placeholder="http://maps.secondlife.com/secondlife/Region/128/128/22"></div>
-    <div class="field"><label>Landmark UUID (in-game teleport)</label><input id="f_lm" placeholder="Copy from landmark inventory (right-click > Copy Asset UUID)"></div>
+    <div class="form-group"><label>SLurl (web: teleport link)</label><input type="text" id="fSlurl" placeholder="http://maps.secondlife.com/..."></div>
+    <div class="form-group"><label>Landmark UUID (in-game teleport)</label><input type="text" id="fLandmark" placeholder="00000000-0000-0000-0000-000000000000"></div>
+    <div style="display:flex; gap:10px;">
+      <button class="btn" id="saveSlot" style="flex:1;">💾 Save Slot</button>
+      <button class="btn btn-secondary" id="cancelEdit" style="flex:1;">Cancel</button>
+    </div>
   </div>
-  <div style="margin-top:16px;display:flex;gap:10px">
-    <button class="btn" id="saveBtn">💾 Save Slot</button>
-    <button class="btn ghost" id="cancelBtn">Cancel</button>
-  </div>
+
+  <div id="scheduleList"></div>
 </div>
 
-<div class="grid" id="board"></div>
-<div id="statusMsg"></div>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getFirestore, collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-<script>
-/* ================= CONFIG ================= */
-const ADMIN_PASSWORD = "djadmin";   // <-- CHANGE THIS to your DJ password
-const LS_KEY = "djScheduleBoard_v1";
-
-/* ================= STATE ================= */
-let entries = JSON.parse(localStorage.getItem(LS_KEY) || "[]");
-let isAdmin = sessionStorage.getItem("djAdmin") === "1";
-
-const $ = id => document.getElementById(id);
-const esc = s => String(s??"").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const save = () => localStorage.setItem(LS_KEY, JSON.stringify(entries));
-
-function fmtDate(d){
-  if(!d) return "—";
-  const dt = new Date(d + "T00:00:00");
-  return dt.toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric',year:'numeric'});
-}
-
-function render(){
-  entries.sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));
-  const board = $("board");
-  board.innerHTML = "";
-  if(!entries.length){
-    board.innerHTML = `<div class="empty">No events scheduled yet. 🎶<br><small>Log in as DJ to add slots.</small></div>`;
-  }
-  for(const e of entries){
-    const card = document.createElement("div");
-    card.className = "card";
-    const lmBtn = (isAdmin && e.lm)
-      ? `<button class="btn small good" onclick="giveLandmark('${e.lm}')">📍 Give Landmark</button>` : "";
-    const slurlLink = e.slurl
-      ? `<a class="sllink" href="${esc(e.slurl)}" target="_blank">🌐 Teleport (web)</a>` : "—";
-    card.innerHTML = `
-      <h2>🎧 ${esc(e.dj)}</h2>
-      <div class="row"><b>Location</b><span>${esc(e.loc)}</span></div>
-      <div class="row"><b>Host</b><span>${esc(e.host)}</span></div>
-      <div class="row"><b>Date</b><span>${fmtDate(e.date)}</span></div>
-      <div class="row"><b>Time</b><span>${esc(e.time)}${e.timeEnd ? " – " + esc(e.timeEnd) : ""}</span></div>
-      <div class="row"><b>Teleport</b><span>${slurlLink}</span></div>
-      ${isAdmin ? `<div class="row"><b>Landmark UUID</b><span style="font-size:.7rem;word-break:break-all">${esc(e.lm||"—")}</span></div>`:""}
-      <div class="genre">${esc(e.genre)}</div>
-      ${isAdmin ? `<div class="card-actions">
-        ${lmBtn}
-        <button class="btn small" onclick="editEntry('${e.id}')">✏️ Edit</button>
-        <button class="btn small danger" onclick="delEntry('${e.id}')">🗑</button>
-      </div>`:""}
-    `;
-    board.appendChild(card);
-  }
-  // admin UI
-  $("addBtn").style.display = isAdmin ? "" : "none";
-  $("importBtn").style.display = isAdmin ? "" : "none";
-  $("loginBtn").textContent = isAdmin ? "🔓 Logout" : "🔒 DJ Login";
-  $("modeBadge").textContent = isAdmin ? "EDIT MODE" : "VIEW ONLY";
-  $("modeBadge").className = "mode-badge" + (isAdmin ? "" : " view");
-}
-
-/* Landmark give in SL: uses the llinventory scheme — works inside Second Life media */
-function giveLandmark(uuid){
-  // Opens the landmark floater in the SL viewer
-  window.location.href = "secondlife:///app/landmark/" + uuid;
-  flash("Requested landmark: " + uuid);
-}
-
-function editEntry(id){
-  const e = entries.find(x=>x.id===id);
-  if(!e) return;
-  $("editorTitle").textContent = "Edit Schedule Slot";
-  for(const k of ["id","dj","loc","host","date","time","timeEnd","genre","slurl","lm"])
-    $("f_"+k).value = e[k] || "";
-  $("editor").style.display = "block";
-  $("editor").scrollIntoView({behavior:"smooth"});
-}
-function delEntry(id){
-  if(!confirm("Delete this slot?")) return;
-  entries = entries.filter(x=>x.id!==id);
-  save(); render(); flash("Slot deleted");
-}
-$("addBtn").onclick = () => {
-  $("editorTitle").textContent = "Add Schedule Slot";
-  ["f_dj","f_loc","f_host","f_date","f_time","f_timeEnd","f_slurl","f_lm"].forEach(i=>$(i).value="");
-  $("f_genre").value = "";
-  $("f_id").value = "";
-  $("editor").style.display = "block";
-  $("editor").scrollIntoView({behavior:"smooth"});
-};
-$("cancelBtn").onclick = () => $("editor").style.display = "none";
-
-$("saveBtn").onclick = () => {
-  const req = ["dj","loc","host","date","time","genre"];
-  for(const k of req){
-    if(!$("f_"+k).value.trim()){ flash("Please fill: " + k.toUpperCase()); return; }
-  }
-  const data = {
-    id: $("f_id").value || Date.now().toString(36),
-    dj: $("f_dj").value.trim(), loc: $("f_loc").value.trim(), host: $("f_host").value.trim(),
-    date: $("f_date").value, time: $("f_time").value, timeEnd: $("f_timeEnd").value,
-    genre: $("f_genre").value, slurl: $("f_slurl").value.trim(), lm: $("f_lm").value.trim()
+  // PASTE YOUR FIREBASE CONFIG HERE
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT.firebaseapp.com",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_PROJECT.appspot.com",
+    messagingSenderId: "YOUR_SENDER_ID",
+    appId: "YOUR_APP_ID"
   };
-  const i = entries.findIndex(x=>x.id===data.id);
-  if(i>=0) entries[i]=data; else entries.push(data);
-  save(); render();
-  $("editor").style.display = "none";
-  flash("Slot saved ✔");
-};
 
-/* login */
-$("loginBtn").onclick = () => {
-  if(isAdmin){ isAdmin=false; sessionStorage.removeItem("djAdmin"); render(); return; }
-  $("loginBox").style.display = $("loginBox").style.display==="flex" ? "none" : "flex";
-};
-$("doLogin").onclick = () => {
-  if($("pwInput").value === ADMIN_PASSWORD){
-    isAdmin = true; sessionStorage.setItem("djAdmin","1");
-    $("loginBox").style.display="none"; $("pwInput").value=""; $("loginErr").textContent="";
-    render(); flash("Welcome back, DJ! 🎛️");
-  } else {
-    $("loginErr").textContent = "Wrong password";
-  }
-};
-$("pwInput").addEventListener("keydown", e=>{ if(e.key==="Enter") $("doLogin").click(); });
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  const colRef = collection(db, "schedule");
 
-/* export / import */
-$("exportBtn").onclick = () => {
-  const blob = new Blob([JSON.stringify(entries,null,2)],{type:"application/json"});
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob); a.download = "dj-schedule.json"; a.click();
-};
-$("importBtn").onclick = () => {
-  const inp = document.createElement("input");
-  inp.type="file"; inp.accept=".json";
-  inp.onchange = () => {
-    const r = new FileReader();
-    r.onload = () => {
-      try{
-        const data = JSON.parse(r.result);
-        if(Array.isArray(data)){ entries = data; save(); render(); flash("Schedule imported ✔"); }
-      }catch(e){ flash("Invalid file"); }
+  let isAdmin = false;
+  let currentSlots = [];
+
+  const loginBtn = document.getElementById('loginBtn');
+  const logoutBtn = document.getElementById('logoutBtn');
+  const loginArea = document.getElementById('loginArea');
+  const editArea = document.getElementById('editArea');
+  const scheduleList = document.getElementById('scheduleList');
+
+  loginBtn.onclick = () => { loginArea.style.display = 'block'; };
+  logoutBtn.onclick = () => { signOut(auth); };
+
+  document.getElementById('submitLogin').onclick = async () => {
+    const email = document.getElementById('loginEmail').value;
+    const pass = document.getElementById('loginPassword').value;
+    try {
+      await signInWithEmailAndPassword(auth, email, pass);
+      loginArea.style.display = 'none';
+    } catch (e) {
+      document.getElementById('loginError').innerText = e.message;
+      document.getElementById('loginError').style.display = 'block';
+    }
+  };
+
+  document.getElementById('cancelEdit').onclick = () => {
+    editArea.style.display = 'none';
+    document.getElementById('editTitle').innerText = 'Add Schedule Slot';
+    document.getElementById('editId').value = '';
+    ['fDj','fLocation','fHost','fDate','fStart','fEnd','fGenre','fSlurl','fLandmark'].forEach(id => document.getElementById(id).value = '');
+  };
+
+  document.getElementById('saveSlot').onclick = async () => {
+    const data = {
+      dj: document.getElementById('fDj').value,
+      location: document.getElementById('fLocation').value,
+      host: document.getElementById('fHost').value,
+      date: document.getElementById('fDate').value,
+      start: document.getElementById('fStart').value,
+      end: document.getElementById('fEnd').value,
+      genre: document.getElementById('fGenre').value,
+      slurl: document.getElementById('fSlurl').value,
+      landmark: document.getElementById('fLandmark').value
     };
-    r.readAsText(inp.files[0]);
+    
+    if(!data.dj || !data.location || !data.host || !data.date || !data.start || !data.genre) {
+      alert("Please fill in all required fields marked with *");
+      return;
+    }
+
+    const editId = document.getElementById('editId').value;
+    try {
+      if (editId) {
+        await updateDoc(doc(db, "schedule", editId), data);
+      } else {
+        await addDoc(colRef, data);
+      }
+      document.getElementById('cancelEdit').click();
+    } catch (e) {
+      alert("Error saving: " + e.message);
+    }
   };
-  inp.click();
-};
 
-function flash(msg){
-  const s = $("statusMsg");
-  s.textContent = msg; s.style.display = "block";
-  clearTimeout(s._t); s._t = setTimeout(()=>s.style.display="none", 2500);
-}
+  onAuthStateChanged(auth, (user) => {
+    isAdmin = !!user;
+    loginBtn.classList.toggle('hidden', isAdmin);
+    logoutBtn.classList.toggle('hidden', !isAdmin);
+    renderSlots();
+  });
 
-render();
+  onSnapshot(query(colRef, orderBy("date", "asc")), (snapshot) => {
+    currentSlots = [];
+    snapshot.forEach(docSnap => {
+      currentSlots.push({ id: docSnap.id, ...docSnap.data() });
+    });
+    renderSlots();
+  });
+
+  function renderSlots() {
+    scheduleList.innerHTML = '';
+    if (currentSlots.length === 0) {
+      scheduleList.innerHTML = '<p style="text-align:center; color:#888;">No scheduled slots yet.</p>';
+      if(isAdmin) {
+         scheduleList.innerHTML += '<div style="text-align:center; margin-top:20px;"><button class="btn" onclick="document.getElementById(\'editArea\').style.display=\'block\'">+ Add Slot</button></div>';
+      }
+      return;
+    }
+    
+    if(isAdmin) {
+      const addBtnDiv = document.createElement('div');
+      addBtnDiv.style.textAlign = 'center';
+      addBtnDiv.style.marginBottom = '20px';
+      addBtnDiv.innerHTML = '<button class="btn" onclick="document.getElementById(\'editTitle\').innerText=\'Add Schedule Slot\'; document.getElementById(\'editId\').value=\'\'; [\'fDj\',\'fLocation\',\'fHost\',\'fDate\',\'fStart\',\'fEnd\',\'fGenre\',\'fSlurl\',\'fLandmark\'].forEach(id => document.getElementById(id).value = \'\'); document.getElementById(\'editArea\').style.display=\'block\'">+ Add Slot</button>';
+      scheduleList.appendChild(addBtnDiv);
+    }
+
+    currentSlots.forEach(slot => {
+      const div = document.createElement('div');
+      div.className = 'slot';
+      let html = `<h3>${slot.dj} - ${slot.genre}</h3>`;
+      html += `<p><span class="label">Date:</span> ${slot.date} | <span class="label">Time:</span> ${slot.start} - ${slot.end || 'TBA'}</p>`;
+      html += `<p><span class="label">Location:</span> ${slot.location} | <span class="label">Host:</span> ${slot.host}</p>`;
+      if (slot.slurl) html += `<p><a href="${slot.slurl}" target="_blank" class="teleport-link">🌐 Teleport (web)</a></p>`;
+      if (isAdmin) {
+        html += `<div style="margin-top:15px; border-top:1px solid #333; padding-top:10px;">`;
+        html += `<button class="btn" onclick="window.editSlot('${slot.id}')">Edit</button> `;
+        html += `<button class="btn btn-danger" onclick="window.deleteSlot('${slot.id}')">Delete</button>`;
+        html += `</div>`;
+      }
+      div.innerHTML = html;
+      scheduleList.appendChild(div);
+    });
+  }
+
+  window.editSlot = (id) => {
+    const slot = currentSlots.find(s => s.id === id);
+    if (!slot) return;
+    document.getElementById('editTitle').innerText = 'Edit Schedule Slot';
+    document.getElementById('editId').value = id;
+    document.getElementById('fDj').value = slot.dj || '';
+    document.getElementById('fLocation').value = slot.location || '';
+    document.getElementById('fHost').value = slot.host || '';
+    document.getElementById('fDate').value = slot.date || '';
+    document.getElementById('fStart').value = slot.start || '';
+    document.getElementById('fEnd').value = slot.end || '';
+    document.getElementById('fGenre').value = slot.genre || '';
+    document.getElementById('fSlurl').value = slot.slurl || '';
+    document.getElementById('fLandmark').value = slot.landmark || '';
+    editArea.style.display = 'block';
+    window.scrollTo(0, 0);
+  };
+
+  window.deleteSlot = async (id) => {
+    if (confirm("Delete this slot?")) {
+      await deleteDoc(doc(db, "schedule", id));
+    }
+  };
 </script>
 </body>
 </html>
