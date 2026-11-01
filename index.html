@@ -75,6 +75,13 @@ input[type=checkbox]{width:auto;accent-color:var(--cyan);margin-right:8px}
 
   <!-- All export controls are hidden until Firebase confirms login. -->
   <section class="panel" id="adminTools" hidden>
+  <div class="status" id="connectionStatus" role="status">
+    Connecting to Firebase…
+  </div>
+
+  <h2>Schedule management</h2>
+  <p class="hint" id="adminSummary"></p>
+    
     <h2>Schedule management</h2>
     <p class="hint" id="adminSummary"></p>
     <div class="controls">
