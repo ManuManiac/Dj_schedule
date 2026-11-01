@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Club Pulse — DJ Schedule Board</title>
+<style>
+  :root{
+    --bg:#0b0b14; --panel:#14142a; --panel2:#1c1c38; --accent:#b026ff;
+    --accent2:#00e5ff; --text:#e8e8ff; --dim:#8a8ab0; --good:#3dff9c; --bad:#ff5c7a;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',Arial,sans-serif}
+  body{background:radial-gradient(ellipse at top,#1a1a35 0%,var(--bg) 60%);color:var(--text);min-height:100vh;padding:20px}
+  header{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:20px}
+  h1{font-size:1.6rem;letter-spacing:3px;text-transform:uppercase;
+     background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .sub{color:var(--dim);font-size:.8rem}
+  .btn{background:linear-gradient(135deg,var(--accent),#7a1fd0);border:none;color:#fff;padding:9px 18px;border-radius:8px;
+       cursor:pointer;font-weight:600;font-size:.85rem;transition:.2s}
+  .btn:hover{filter:brightness(1.2)}
+  .btn.ghost{background:transparent;border:1px solid var(--accent);color:var(--accent)}
+  .btn.small{padding:5px 12px;font-size:.75rem}
+  .btn.danger{background:transparent;border:1px solid var(--bad);color:var(--bad)}
+  .btn.good{border-color:var(--good);color:var(--good);background:transparent;border:1px solid var(--good)}
+  .toolbar{display:flex;gap:8px;flex-wrap:wrap}
+  #loginBox{display:none;gap:8px;align-items:center;background:var(--panel);padding:10px;border-radius:10px;margin-bottom:16px;flex-wrap:wrap}
+  input,select{background:var(--panel2);border:1px solid #33335c;color:var(--text);padding:8px 10px;border-radius:6px;font-size:.85rem}
+  input:focus,select:focus{outline:none;border-color:var(--accent)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:16px}
+  .card{background:linear-gradient(160deg,var(--panel),var(--panel2));border:1px solid #2a2a55;border-radius:14px;
+        padding:16px;position:relative;overflow:hidden;transition:.25s}
+  .card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
+        background:linear-gradient(90deg,var(--accent),var(--accent2))}
+  .card:hover{transform:translateY(-3px);box-shadow:0 8px 25px rgba(176,38,255,.25)}
+  .card h2{font-size:1.05rem;margin-bottom:6px;color:var(--accent2)}
+  .row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px dashed #2a2a55;font-size:.85rem}
+  .row:last-child{border-bottom:none}
+  .row b{color:var(--dim);font-weight:600;font-size:.75rem;text-transform:uppercase;letter-spacing:1px}
+  .genre{display:inline-block;background:rgba(0,229,255,.12);color:var(--accent2);padding:2px 10px;border-radius:20px;font-size:.75rem;margin-top:8px}
+  .card-actions{display:flex;gap:6px;margin-top:10px}
+  .card-actions .btn{flex:1}
+  #editor{display:none;background:var(--panel);border:1px solid #33335c;border-radius:14px;padding:20px;margin-bottom:20px}
+  #editor h3{margin-bottom:14px;color:var(--accent2)}
+  .form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+  .field label{display:block;font-size:.72rem;color:var(--dim);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+  .field input,.field select{width:100%}
+  .empty{grid-column:1/-1;text-align:center;color:var(--dim);padding:60px 0}
+  #statusMsg{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--good);color:#000;
+             padding:10px 22px;border-radius:8px;font-weight:600;display:none;z-index:99}
+  .mode-badge{background:var(--good);color:#000;font-size:.7rem;font-weight:700;padding:3px 10px;border-radius:12px;display:none}
+  .mode-badge.view{display:inline-block;background:#33335c;color:var(--dim)}
+  a.sllink{color:var(--accent2);text-decoration:none}
+  a.sllink:hover{text-decoration:underline}
+</style>
+<style>
+.repeat-settings{padding:12px;border:1px solid #33335c;border-radius:8px;margin-top:12px}
+.repeat-settings label{display:block;margin:8px 0;color:var(--dim);font-size:.85rem}
+.repeat-settings input[type=checkbox]{width:auto;margin-right:8px}
+.note{color:var(--dim);font-size:.8rem;line-height:1.5;margin:10px 0}
+#pngPanel{display:none;margin:16px 0;padding:14px;background:var(--panel);border-radius:10px}
+#pngPreview{display:block;width:240px;max-width:100%;margin-top:10px;border:1px solid #33335c}
+.capture{width:1024px;min-height:1024px;padding:28px;background:#0b0b14;color:var(--text)}
+.capture h1{background:none;color:#00e5ff;font-size:25px;margin-bottom:8px}
+.capture .grid{grid-template-columns:repeat(2,minmax(0,1fr));margin-top:24px}
+.capture .card{transform:none;box-shadow:none;background:#14142a}
+.capture .card h2{font-size:21px}.capture .row{font-size:17px;gap:16px}
+.capture .row b{font-size:13px}.capture .row span{text-align:right}
+.capture .genre{font-size:15px}.capture .note{font-size:15px}
+</style>
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+</head>
+<body>
+<header>
+  <div>
+    <h1>🎧 Club Pulse — DJ Schedule</h1>
+    <div class="sub">Live schedule board &nbsp;•&nbsp; <span class="mode-badge view" id="modeBadge">VIEW ONLY</span></div>
+  </div>
+  <div class="toolbar">
+    <button class="btn" id="addBtn" style="display:none">＋ Add Slot</button>
+    <button class="btn ghost small" id="importBtn" style="display:none">Import</button>
+    <button class="btn ghost small" id="exportBtn">Export JSON</button>
+    <button class="btn ghost small" id="pngBtn">Download Visitor PNG</button>
+    <button class="btn ghost small" id="loginBtn">🔒 DJ Login</button>
+  </div>
+</header>
+
+<div id="loginBox">
+  <span style="font-size:.85rem;color:var(--dim)">DJ password:</span>
+  <input type="password" id="pwInput" placeholder="Enter password">
+  <button class="btn small" id="doLogin">Login</button>
+  <span id="loginErr" style="color:var(--bad);font-size:.8rem"></span>
+</div>
+
+<div id="editor">
+  <h3 id="editorTitle">Add Schedule Slot</h3>
+  <input type="hidden" id="f_id">
+  <div class="form-grid">
+    <div class="field"><label>DJ Name *</label><input id="f_dj" placeholder="DJ Nova"></div>
+    <div class="field"><label>Location / Venue *</label><input id="f_loc" placeholder="Club Pulse Main Stage"></div>
+    <div class="field"><label>Host *</label><input id="f_host" placeholder="Host name"></div>
+    <div class="field"><label>Date *</label><input id="f_date" type="date"></div>
+    <div class="field"><label>Start Time *</label><input id="f_time" type="time"></div>
+    <div class="field"><label>End Time</label><input id="f_timeEnd" type="time"></div>
+    <div class="field"><label>Music Genre *</label>
+      <select id="f_genre">
+        <option value="">— choose —</option>
+        <option>House</option><option>Techno</option><option>Trance</option>
+        <option>EDM</option><option>Hip-Hop / R&B</option><option>Rock</option>
+        <option>Country</option><option>Pop / Top 40</option><option>80s / Retro</option>
+        <option>Dubstep / Bass</option><option>Drum & Bass</option><option>Open Format</option>
+        <option>Other</option>
+      </select>
+    </div>
+    <div class="field"><label>SLurl (web: teleport link)</label><input id="f_slurl" placeholder="http://maps.secondlife.com/secondlife/Region/128/128/22"></div>
+    <div class="field"><label>Landmark UUID (in-game teleport)</label><input id="f_lm" placeholder="Copy from landmark inventory (right-click > Copy Asset UUID)"></div>
+  </div>
+  <div class="repeat-settings">
+    <label>Event timezone <select id="f_zone">
+      <option value="America/Los_Angeles">SLT / Pacific (daylight saving aware)</option>
+      <option value="Asia/Ho_Chi_Minh">Vietnam (ICT)</option>
+      <option value="Europe/Berlin">Germany</option>
+      <option value="UTC">UTC</option>
+    </select></label>
+    <label><input type="checkbox" id="f_repeat"> Repeat this gig</label>
+    <div id="repeatControls" hidden>
+      <label>Repeat every <select id="f_frequency">
+        <option value="weekly">1 week</option>
+        <option value="biweekly">2 weeks</option>
+        <option value="triweekly">3 weeks</option>
+        <option value="monthly">1 calendar month</option>
+      </select></label>
+      <label id="monthlyControls" hidden>Monthly rule <select id="f_monthlyMode">
+        <option value="day">Same day of month (short months use last day)</option>
+        <option value="weekday">Same numbered weekday (e.g. second Friday)</option>
+      </select></label>
+    </div>
+    <p class="note">Date is the original/anchor date, not a date to overwrite each week. Only one occurrence is shown per entry. A gig stays visible until its end time; without an end time it rolls over at its start. A fifth-weekday monthly rule skips months without that weekday.</p>
+  </div>
+  <div style="margin-top:16px;display:flex;gap:10px">
+    <button class="btn" id="saveBtn">💾 Save Slot</button>
+    <button class="btn ghost" id="cancelBtn">Cancel</button>
+  </div>
+</div>
+
+<div id="pngPanel">
+  <label><input type="checkbox" id="autoPNG" checked> Regenerate visitor image after edits and date rollovers while this admin page is open</label>
+  <p class="note">Image generation does not upload to Second Life. Download the PNG, upload it as a texture, and apply it to the display face. Export JSON to back up your events. This version retains the original browser-local storage.</p>
+  <div id="pngState" class="note">Visitor PNG not generated yet.</div>
+  <img id="pngPreview" alt="Generated visitor-view image preview" hidden>
+</div>
+<div class="grid" id="board"></div>
+<div id="statusMsg"></div>
+
+<script>
+/* ================= CONFIG ================= */
+const ADMIN_PASSWORD = "djadmin";   // <-- CHANGE THIS to your DJ password
+const LS_KEY = "djScheduleBoard_v1";
+
+/* ================= STATE ================= */
+let entries = JSON.parse(localStorage.getItem(LS_KEY) || "[]");
+const forceVisitor = new URLSearchParams(location.search).get("view") === "visitor";
+let isAdmin = !forceVisitor && sessionStorage.getItem("djAdmin") === "1";
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s??"").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const save = () => localStorage.setItem(LS_KEY, JSON.stringify(entries));
+
+
+const DEFAULT_ZONE = "America/Los_Angeles";
+const DAY = 86400000;
+const labels = {weekly:"Weekly",biweekly:"Every 2 weeks",triweekly:"Every 3 weeks",monthly:"Monthly"};
+const formatters = new Map();
+function zoneParts(ms, zone){
+  if(!formatters.has(zone)) formatters.set(zone,new Intl.DateTimeFormat("en-GB",{
+    timeZone:zone,year:"numeric",month:"2-digit",day:"2-digit",
+    hour:"2-digit",minute:"2-digit",second:"2-digit",hourCycle:"h23"
+  }));
+  const out={};
+  for(const p of formatters.get(zone).formatToParts(new Date(ms)))
+    if(p.type!=="literal") out[p.type]=Number(p.value);
+  return out;
+}
+function wallStamp(p){return Date.UTC(p.year,p.month-1,p.day,p.hour||0,p.minute||0,p.second||0);}
+function wallToUTC(date,time,zone){
+  const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(date||"");
+  const t=/^(\d{2}):(\d{2})$/.exec(time||"");
+  if(!m||!t) return null;
+  const desired=Date.UTC(+m[1],+m[2]-1,+m[3],+t[1],+t[2]);
+  if(new Date(desired).toISOString().slice(0,10)!==date||+t[1]>23||+t[2]>59) return null;
+  const offsets=new Set();
+  for(let h=-36;h<=36;h+=6){
+    const probe=desired+h*3600000;
+    offsets.add(wallStamp(zoneParts(probe,zone))-probe);
+  }
+  const matches=[...offsets].map(offset=>desired-offset)
+    .filter(ms=>wallStamp(zoneParts(ms,zone))===desired);
+  // A repeated autumn hour uses its earlier occurrence. A missing spring hour is skipped.
+  return matches.length?Math.min(...matches):null;
+}
+function dateAdd(date,days){return new Date(Date.parse(date+"T00:00:00Z")+days*DAY).toISOString().slice(0,10);}
+function monthlyDate(anchor,step,mode){
+  const a=new Date(anchor+"T00:00:00Z");
+  const first=new Date(Date.UTC(a.getUTCFullYear(),a.getUTCMonth()+step,1));
+  const last=new Date(Date.UTC(first.getUTCFullYear(),first.getUTCMonth()+1,0)).getUTCDate();
+  let day;
+  if(mode==="weekday"){
+    const ordinal=Math.floor((a.getUTCDate()-1)/7);
+    day=1+(a.getUTCDay()-first.getUTCDay()+7)%7+7*ordinal;
+    if(day>last) return null;
+  } else day=Math.min(a.getUTCDate(),last);
+  first.setUTCDate(day);
+  return first.toISOString().slice(0,10);
+}
+function occurrenceAt(e,date){
+  const zone=e.zone||DEFAULT_ZONE;
+  const start=wallToUTC(date,e.time,zone);
+  if(start===null) return null;
+  let end=start;
+  if(e.timeEnd){
+    const endDate=e.timeEnd<=e.time?dateAdd(date,1):date;
+    end=wallToUTC(endDate,e.timeEnd,zone);
+    if(end===null) return null;
+  }
+  return {entry:e,date,start,end,zone};
+}
+function nextOccurrence(e,now=Date.now()){
+  try{
+    const anchor=occurrenceAt(e,e.date);
+    if(!e.repeat) return anchor && anchor.end>now?anchor:null;
+    const frequency=e.frequency||"weekly";
+    const local=zoneParts(now,e.zone||DEFAULT_ZONE);
+    const today=Date.UTC(local.year,local.month-1,local.day);
+    const origin=Date.parse(e.date+"T00:00:00Z");
+    if(!Number.isFinite(origin)) return null;
+    let step=0;
+    const interval={weekly:7,biweekly:14,triweekly:21}[frequency];
+    if(frequency==="monthly"){
+      const a=new Date(origin);
+      step=Math.max(0,(local.year-a.getUTCFullYear())*12+local.month-1-a.getUTCMonth()-1);
+    }else{
+      if(!interval) return null;
+      step=Math.max(0,Math.floor((today-origin)/(interval*DAY))-1);
+    }
+    for(let n=0;n<2400;n++,step++){
+      const date=frequency==="monthly"?monthlyDate(e.date,step,e.monthlyMode):dateAdd(e.date,step*interval);
+      if(!date) continue;
+      const occurrence=occurrenceAt(e,date);
+      if(occurrence && occurrence.end>now) return occurrence;
+    }
+  }catch(err){console.warn("Invalid schedule entry",e.id,err);}
+  return null;
+}
+function fmtDate(d){
+  return d?new Date(d+"T00:00:00Z").toLocaleDateString("en-GB",{
+    timeZone:"UTC",weekday:"short",month:"short",day:"numeric",year:"numeric"
+  }):"—";
+}
+function validWebLink(url){
+  try{const u=new URL(url);return ["https:","http:"].includes(u.protocol)?u.href:"";}catch(_){return "";}
+}
+function cardHTML(e,o,admin){
+  const url=validWebLink(e.slurl);
+  const slurl=url?`<a class="sllink" href="${esc(url)}" target="_blank" rel="noopener noreferrer">Teleport (web)</a>`:"—";
+  const id=esc(e.id);
+  const repeat=e.repeat?`✓ ${labels[e.frequency||"weekly"]||"Repeating"}`:"One-time event";
+  return `<h2>🎧 ${esc(e.dj)}</h2>
+    <div class="row"><b>Location</b><span>${esc(e.loc)}</span></div>
+    <div class="row"><b>Host</b><span>${esc(e.host)}</span></div>
+    <div class="row"><b>${o&&o.start<=Date.now()?"Live now":"Next date"}</b><span>${o?fmtDate(o.date):"Finished / no upcoming occurrence"}</span></div>
+    <div class="row"><b>Time</b><span>${esc(e.time)}${e.timeEnd?" – "+esc(e.timeEnd):""}<br><small>${esc(e.zone||DEFAULT_ZONE)}</small></span></div>
+    <div class="row"><b>Repeats</b><span>${esc(repeat)}</span></div>
+    <div class="row"><b>Teleport</b><span>${slurl}</span></div>
+    ${admin?`<div class="row"><b>Landmark UUID</b><span style="font-size:.7rem;word-break:break-all">${esc(e.lm||"—")}</span></div>`:""}
+    <div class="genre">${esc(e.genre)}</div>
+    ${admin?`<div class="card-actions">
+      ${e.lm?`<button class="btn small good" data-action="landmark" data-id="${id}">Give Landmark</button>`:""}
+      <button class="btn small" data-action="edit" data-id="${id}">Edit</button>
+      <button class="btn small danger" data-action="delete" data-id="${id}">Delete</button>
+    </div>`:""}`;
+}
+function upcoming(now=Date.now()){
+  return entries.map(e=>nextOccurrence(e,now)).filter(Boolean).sort((a,b)=>a.start-b.start);
+}
+let pngSignature="";
+let pngTimer;
+function render(){
+  const rows=upcoming();
+  const board=$("board"); board.innerHTML="";
+  const visible=isAdmin?[
+    ...rows.map(o=>({e:o.entry,o})),
+    ...entries.filter(e=>!rows.some(o=>o.entry===e)).map(e=>({e,o:null}))
+  ]:rows.map(o=>({e:o.entry,o}));
+  if(!visible.length) board.innerHTML='<div class="empty">No upcoming events scheduled. 🎶</div>';
+  for(const {e,o} of visible){
+    const card=document.createElement("div");card.className="card";
+    card.innerHTML=cardHTML(e,o,isAdmin);board.appendChild(card);
+  }
+  $("addBtn").style.display=isAdmin?"":"none";
+  $("importBtn").style.display=isAdmin?"":"none";
+  $("pngPanel").style.display=isAdmin?"block":"none";
+  $("loginBtn").style.display=forceVisitor?"none":"";
+  $("loginBtn").textContent=isAdmin?"🔓 Logout":"🔒 DJ Login";
+  $("modeBadge").textContent=isAdmin?"EDIT MODE":"VIEW ONLY";
+  $("modeBadge").className="mode-badge"+(isAdmin?"":" view");
+  if(!isAdmin){$("editor").style.display="none";$("loginBox").style.display="none";}
+  const sig=JSON.stringify(rows.map(o=>[o.entry,o.date,o.start<=Date.now()]));
+  if(sig!==pngSignature || (isAdmin && !pngBlob)){
+    pngSignature=sig;
+    $("pngState").textContent="Visitor image needs regeneration.";
+    if(isAdmin && $("autoPNG").checked){
+      clearTimeout(pngTimer);pngTimer=setTimeout(()=>generatePNG(false),500);
+    }
+  }
+}
+$("board").addEventListener("click",event=>{
+  const btn=event.target.closest("button[data-action]");
+  if(!isAdmin||!btn)return;
+  const e=entries.find(x=>String(x.id)===btn.dataset.id);if(!e)return;
+  if(btn.dataset.action==="edit")editEntry(e.id);
+  if(btn.dataset.action==="delete")delEntry(e.id);
+  if(btn.dataset.action==="landmark")giveLandmark(e.lm);
+});
+let pngBlob=null;
+let generatingPNG=false;
+async function generatePNG(download){
+  if(generatingPNG){flash("Image generation is busy; please try again shortly.");return;}
+  if(typeof html2canvas!=="function"){
+    $("pngState").textContent="Image library did not load. Check your internet connection and reload.";
+    flash("PNG library unavailable. Your schedule still works.");return;
+  }
+  generatingPNG=true;$("pngBtn").disabled=true;
+  const container=document.createElement("div");
+  container.className="capture";
+  container.style.position="absolute";container.style.left="-20000px";container.style.top="0";
+  const rows=upcoming();
+  container.innerHTML=`<h1>🎧 Club Pulse — DJ Schedule</h1>
+    <p class="note">Visitor view • One occurrence per event • Times use each event's timezone</p>
+    <div class="grid">${rows.length?rows.map(o=>`<div class="card">${cardHTML(o.entry,o,false)}</div>`).join(""):'<div class="empty">No upcoming events scheduled.</div>'}</div>
+    <p class="note">Snapshot generated ${esc(new Date().toISOString())} • Static fallback; live webpage may be newer.</p>`;
+  document.body.appendChild(container);
+  try{
+    if(document.fonts)await document.fonts.ready;
+    const canvas=await html2canvas(container,{backgroundColor:"#0b0b14",scale:1,logging:false,windowWidth:1100});
+    const blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/png"));
+    if(!blob)throw new Error("PNG encoding failed");
+    pngBlob=blob;
+    const img=$("pngPreview");
+    if(img.dataset.objectUrl)URL.revokeObjectURL(img.dataset.objectUrl);
+    const objectUrl=URL.createObjectURL(blob);img.src=objectUrl;img.dataset.objectUrl=objectUrl;img.hidden=false;
+    $("pngState").textContent=`Visitor PNG generated: ${canvas.width} × ${canvas.height}. Not uploaded to Second Life.`;
+    if(download)downloadBlob(blob,"dj-schedule-visitor.png");
+  }catch(err){
+    $("pngState").textContent="PNG generation failed: "+err.message;
+    flash("Could not generate visitor PNG.");
+  }finally{container.remove();generatingPNG=false;$("pngBtn").disabled=false;}
+}
+function downloadBlob(blob,name){
+  const url=URL.createObjectURL(blob);const a=document.createElement("a");
+  a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),60000);
+}
+$("pngBtn").onclick=()=>generatePNG(true);
+function syncRepeatControls(){
+  $("repeatControls").hidden=!$("f_repeat").checked;
+  $("monthlyControls").hidden=$("f_frequency").value!=="monthly";
+}
+$("f_repeat").onchange=syncRepeatControls;
+$("f_frequency").onchange=syncRepeatControls;
+$("autoPNG").onchange=()=>{if($("autoPNG").checked)generatePNG(false);};
+setInterval(render,30000);
+window.addEventListener("focus",render);
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)render();});
+window.addEventListener("storage",event=>{
+  if(event.key===LS_KEY){try{entries=JSON.parse(event.newValue||"[]");render();}catch(_){}}
+});
+
+/* Landmark give in SL: uses the llinventory scheme — works inside Second Life media */
+function giveLandmark(uuid){
+  // Opens the landmark floater in the SL viewer
+  window.location.href = "secondlife:///app/landmark/" + uuid;
+  flash("Requested landmark: " + uuid);
+}
+
+function editEntry(id){
+  if(!isAdmin)return;
+  const e = entries.find(x=>x.id===id);
+  if(!e) return;
+  $("editorTitle").textContent = "Edit Schedule Slot";
+  for(const k of ["id","dj","loc","host","date","time","timeEnd","genre","slurl","lm"])
+    $("f_"+k).value = e[k] || "";
+  $("f_repeat").checked=Boolean(e.repeat);
+  $("f_frequency").value=e.frequency||"weekly";
+  $("f_monthlyMode").value=e.monthlyMode||"day";
+  $("f_zone").value=e.zone||DEFAULT_ZONE;
+  syncRepeatControls();
+  $("editor").style.display = "block";
+  $("editor").scrollIntoView({behavior:"smooth"});
+}
+function delEntry(id){
+  if(!isAdmin)return;
+  if(!confirm("Delete this slot?")) return;
+  entries = entries.filter(x=>x.id!==id);
+  save(); render(); flash("Slot deleted");
+}
+$("addBtn").onclick = () => {
+  if(!isAdmin)return;
+  $("f_repeat").checked=false;$("f_frequency").value="weekly";
+  $("f_monthlyMode").value="day";$("f_zone").value=DEFAULT_ZONE;
+  syncRepeatControls();
+  $("editorTitle").textContent = "Add Schedule Slot";
+  ["f_dj","f_loc","f_host","f_date","f_time","f_timeEnd","f_slurl","f_lm"].forEach(i=>$(i).value="");
+  $("f_genre").value = "";
+  $("f_id").value = "";
+  $("editor").style.display = "block";
+  $("editor").scrollIntoView({behavior:"smooth"});
+};
+$("cancelBtn").onclick = () => $("editor").style.display = "none";
+
+$("saveBtn").onclick = () => {
+  if(!isAdmin)return;
+  const req = ["dj","loc","host","date","time","genre"];
+  for(const k of req){
+    if(!$("f_"+k).value.trim()){ flash("Please fill: " + k.toUpperCase()); return; }
+  }
+  const data = {
+    id: $("f_id").value || Date.now().toString(36),
+    dj: $("f_dj").value.trim(), loc: $("f_loc").value.trim(), host: $("f_host").value.trim(),
+    date: $("f_date").value, time: $("f_time").value, timeEnd: $("f_timeEnd").value,
+    repeat: $("f_repeat").checked, frequency: $("f_frequency").value,
+    monthlyMode: $("f_monthlyMode").value, zone: $("f_zone").value,
+    genre: $("f_genre").value, slurl: $("f_slurl").value.trim(), lm: $("f_lm").value.trim()
+  };
+  if(!occurrenceAt(data,data.date)){
+    flash("Invalid date/time, or a time skipped by daylight saving. Choose another time.");return;
+  }
+  const i = entries.findIndex(x=>x.id===data.id);
+  if(i>=0) entries[i]=data; else entries.push(data);
+  save(); render();
+  $("editor").style.display = "none";
+  flash("Slot saved ✔");
+};
+
+/* login */
+$("loginBtn").onclick = () => {
+  if(forceVisitor)return;
+  if(isAdmin){ isAdmin=false; sessionStorage.removeItem("djAdmin"); render(); return; }
+  $("loginBox").style.display = $("loginBox").style.display==="flex" ? "none" : "flex";
+};
+$("doLogin").onclick = () => {
+  if(forceVisitor)return;
+  if($("pwInput").value === ADMIN_PASSWORD){
+    isAdmin = true; sessionStorage.setItem("djAdmin","1");
+    $("loginBox").style.display="none"; $("pwInput").value=""; $("loginErr").textContent="";
+    render(); flash("Welcome back, DJ! 🎛️");
+  } else {
+    $("loginErr").textContent = "Wrong password";
+  }
+};
+$("pwInput").addEventListener("keydown", e=>{ if(e.key==="Enter") $("doLogin").click(); });
+
+/* export / import */
+$("exportBtn").onclick = () => {
+  const blob = new Blob([JSON.stringify(entries,null,2)],{type:"application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = "dj-schedule.json"; a.click();
+};
+$("importBtn").onclick = () => {
+  if(!isAdmin)return;
+  const inp = document.createElement("input");
+  inp.type="file"; inp.accept=".json";
+  inp.onchange = () => {
+    const r = new FileReader();
+    r.onload = () => {
+      try{
+        const data = JSON.parse(r.result);
+        if(Array.isArray(data) && data.every(e=>e && typeof e.id==="string" && /^\d{4}-\d{2}-\d{2}$/.test(e.date) && /^\d{2}:\d{2}$/.test(e.time))){ entries = data; save(); render(); flash("Schedule imported ✔"); }
+      }catch(e){ flash("Invalid file"); }
+    };
+    r.readAsText(inp.files[0]);
+  };
+  inp.click();
+};
+
+function flash(msg){
+  const s = $("statusMsg");
+  s.textContent = msg; s.style.display = "block";
+  clearTimeout(s._t); s._t = setTimeout(()=>s.style.display="none", 2500);
+}
+
+render();
+</script>
+</body>
+</html>
