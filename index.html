@@ -271,6 +271,19 @@ function repeatLabel(slot){
   return "✓ "+label;
 }
 function makeCard(slot,o,admin=false,now=Date.now()){
+  function formatTime12(time) {
+  if (!validTime(time)) {
+    return time || "—";
+  }
+
+  const [hourText, minutes] = time.split(":");
+  const hour = Number(hourText);
+
+  const displayHour = hour % 12 || 12;
+  const period = hour >= 12 ? "pm" : "am";
+
+  return `${displayHour}:${minutes} ${period}`;
+}  
   const card=document.createElement("article"), live=o && o.start<=now && o.end>now;
   card.className="slot"+(live?" live":"")+(!o?" expired":"");
   const url=safeURL(slot.slurl);
@@ -278,7 +291,7 @@ function makeCard(slot,o,admin=false,now=Date.now()){
     ${live?'<span class="badge live-badge">LIVE NOW</span>':""}
     <span class="badge">${esc(repeatLabel(slot))}</span>
     <p><span class="label">${live?"Date":"Next date"}:</span> ${o?esc(formatDate(o.date)):"No upcoming occurrence"}</p>
-    <p><span class="label">Time:</span> ${esc(slot.start)}${slot.end?" – "+esc(slot.end):""}${slot.end && slot.end<slot.start?" (+1 day)":""} · ${esc(zoneLabel(slot.timezone||DEFAULT_ZONE))}</p>
+    <p><span class="label">Time:</span> ${esc(formatTime12(slot.start))}${slot.end?" – "+esc(formatTime12(slot.end)):""}${slot.end && slot.end<slot.start?" (+1 day)":""} · ${esc(zoneLabel(slot.timezone||DEFAULT_ZONE))}</p>
     <p><span class="label">Location:</span> ${esc(slot.location)}</p>
     <p><span class="label">Host:</span> ${esc(slot.host)}</p>
     ${url?`<p><a class="teleport" href="${esc(url)}" target="_blank" rel="noopener noreferrer">🌐 Teleport (web)</a></p>`:""}`;
